@@ -1,5 +1,5 @@
 ﻿<UserControl
-    x:Class="Cesibet.Views.CreateServerView"
+    x:Class="Cesibet.Views.QuestionsView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:converters="clr-namespace:Cesibet.ValueConverters"
@@ -26,40 +26,82 @@
 
         <StackPanel Margin="20">
 
-            <TextBox
-                x:Name="NoOfPlayers"
-                Width="200"
+            <StackPanel Margin="0,0,0,20" Orientation="Horizontal">
+
+                <TextBlock
+                    VerticalAlignment="Center"
+                    FontSize="16"
+                    FontStyle="Italic"
+                    FontWeight="Bold"
+                    Foreground="WhiteSmoke"
+                    Text="PlayerName :" />
+
+                <TextBlock
+                    x:Name="PlayerName"
+                    Margin="15,0,0,0"
+                    VerticalAlignment="Center"
+                    FontSize="16"
+                    FontStyle="Italic"
+                    FontWeight="Bold"
+                    Foreground="WhiteSmoke"
+                    Text="TempName" />
+
+            </StackPanel>
+
+
+            <TextBlock
+                x:Name="Question"
+                Width="350"
                 Margin="0,0,0,20"
-                Padding="5"
-                materialDesign:HintAssist.Foreground="Black"
-                materialDesign:HintAssist.Hint="Number of Players"
-                materialDesign:HintAssist.IsFloating="True"
-                Background="WhiteSmoke"
-                BorderBrush="DarkGray"
-                FontSize="18"
-                FontWeight="Bold" />
+                FontSize="16"
+                Foreground="WhiteSmoke"
+                Text="La Lune va finir par tomber sur la Terre à cause de la gravité"
+                TextAlignment="Justify"
+                TextWrapping="Wrap" />
+
+            <StackPanel Margin="0,0,0,25" Orientation="Horizontal">
+
+                <RadioButton
+                    x:Name="IsYes"
+                    Margin="0,0,10,0"
+                    HorizontalAlignment="Left"
+                    Content="Yes"
+                    FontSize="15"
+                    Foreground="White"
+                    IsChecked="True" />
+
+                <RadioButton
+                    x:Name="IsNo"
+                    Margin="0,0,10,0"
+                    HorizontalAlignment="Left"
+                    Content="No"
+                    FontSize="15"
+                    Foreground="White" />
+
+            </StackPanel>
+
 
             <TextBox
-                x:Name="NoOfRounds"
+                x:Name="EstimatedNumber"
                 Margin="0,0,0,20"
                 Padding="5"
                 materialDesign:HintAssist.Foreground="Black"
-                materialDesign:HintAssist.Hint="Number of Rounds"
+                materialDesign:HintAssist.Hint="Number of Yes"
                 materialDesign:HintAssist.IsFloating="True"
                 Background="WhiteSmoke"
-                FontSize="18"
+                FontSize="16"
                 FontWeight="Bold" />
 
             <Grid>
-
                 <Button
-                    x:Name="CreateCommand"
+                    x:Name="SubmitCommand"
+                    Width="120"
                     Height="45"
                     Padding="10"
                     materialDesign:ButtonAssist.CornerRadius="5"
                     Background="#3b3b28"
                     BorderThickness="0"
-                    Content="Create"
+                    Content="Submit"
                     FontSize="18"
                     Visibility="{Binding BtnVisibility}" />
 
@@ -72,7 +114,6 @@
                     Style="{StaticResource LoadingIndicatorArcsRingStyleKey}"
                     Visibility="{Binding BtnVisibility, Converter={StaticResource BtnConverter}}" />
             </Grid>
-
 
         </StackPanel>
 

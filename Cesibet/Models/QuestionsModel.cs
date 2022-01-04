@@ -9,4 +9,11 @@ namespace Cesibet.Models
         public string Question { get; set; }
         public string Answer { get; set; }
     }
+
+    class Answers
+    {
+        public string QuestionAnswer { get; set; }
+        public int Estimate { get; set; }
+    }
+
 }

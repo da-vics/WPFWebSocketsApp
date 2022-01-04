@@ -29,9 +29,12 @@ namespace Cesibet.ViewModels
             }
         }
 
+        private Visibility _btnVisibility { get; set; }
+        public Visibility BtnVisibility { get => _btnVisibility; set { _btnVisibility = value; NotifyOfPropertyChange(); } }
 
         public JoinServerViewModel()
         {
+            BtnVisibility = Visibility.Visible;
             Url = "ws://127.0.0.1:7898/Echo"; // default
         }
 
@@ -43,14 +46,27 @@ namespace Cesibet.ViewModels
                 return;
             }
 
-            var conductor = this.Parent as IConductor;
-            var joinServer = new JoinServer();
+            QuestionsViewModel.Name = UserName;
 
+            BtnVisibility = Visibility.Hidden;
             Task.Run(() =>
             {
-                joinServer.connetToServer(Url, UserName);
+                JoinServer.connetToServer(Url, UserName, resetBtnVisibility);
             });
-            //conductor.ActivateItemAsync(new JoinServerViewModel());
         }
-    }
+
+        private void resetBtnVisibility(int index)
+        {
+            var conductor = this.Parent as IConductor;
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                BtnVisibility = Visibility.Visible;
+                var questionViewModel = new QuestionsViewModel();
+                QuestionsViewModel.IsServer = false;
+                questionViewModel.SetQuestion(index);
+                conductor.ActivateItemAsync(questionViewModel);
+            });
+        }
+
+    }//
 }

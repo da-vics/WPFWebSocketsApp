@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -8,16 +9,28 @@ namespace Cesibet.Helpers
 {
     class JoinServer
     {
+        public static Action<int> realeaseBtn;
+        public static Action<string> realeaseBtnQuestions;
+
+        public static bool Pageup = false;
+        public static int CurIndex = 0;
+
+        private static WebSocket ws;
+
         public JoinServer()
         {
 
         }
 
-        public void connetToServer(string url, string userName)
+        public static void connetToServer(string url, string userName, Action<int> func)
         {
+            realeaseBtn = null;
+            realeaseBtn += func;
+            realeaseBtnQuestions = null;
+
             Task.Run(() =>
             {
-                WebSocket ws = new WebSocket(url);
+                ws = new WebSocket(url);
                 ws.OnMessage += Ws_OnMessage;
                 ws.Connect();
                 ws.Send($"username:{userName}");
@@ -25,13 +38,38 @@ namespace Cesibet.Helpers
             });
         }//
 
+        public static void sendMessage(string str)
+        {
+            Task.Run(() => { ws.Send(str); Thread.Sleep(1000); });
+        }
 
         private static void Ws_OnMessage(object sender, MessageEventArgs e)
         {
             Debug.WriteLine(e.Data);
 
-            if (e.Data.Contains("Added"))
+            var Data = e.Data;
+
+            if (Data.Contains("Added"))
                 MessageBox.Show("connected successfully");
+
+            else if (Data.Contains("GameOn"))
+            {
+                var split = Data.Split(":");
+                realeaseBtn?.Invoke(Int32.Parse(split[1]));
+            }
+
+            else if (Data.Contains("ShowResult"))
+            {
+                var spilt = Data.Split(":");
+                realeaseBtnQuestions?.Invoke($"Number of Yes: {spilt[1]}");
+            }
+
+            else if (Data.Contains("Next"))
+            {
+                Pageup = true;
+                var spilt = Data.Split(":");
+                CurIndex = Int32.Parse(spilt[1]);
+            }
         }
 
     }//

@@ -111,16 +111,31 @@ namespace Cesibet.ViewModels
 
         }
 
-        private void resetBtnVisibility(string numberYes)
+        private void resetBtnVisibility(string numberYes, bool done)
         {
             var conductor = this.Parent as IConductor;
-            ValidationsViewModel validationsViewModel = new ValidationsViewModel();
-            Application.Current.Dispatcher.Invoke(() =>
+
+            if (done == false)
             {
-                BtnVisibility = Visibility.Visible;
-                validationsViewModel.InitReport(numberYes);
-                conductor.ActivateItemAsync(validationsViewModel);
-            });
+                ValidationsViewModel validationsViewModel = new ValidationsViewModel();
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    BtnVisibility = Visibility.Visible;
+                    validationsViewModel.InitReport(numberYes);
+                    conductor.ActivateItemAsync(validationsViewModel);
+                });
+            }
+
+            else
+            {
+                ResultsViewModel resultsViewModel = new ResultsViewModel();
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    BtnVisibility = Visibility.Visible;
+                    resultsViewModel.loadData();
+                    conductor.ActivateItemAsync(resultsViewModel);
+                });
+            }
         }
 
     }//

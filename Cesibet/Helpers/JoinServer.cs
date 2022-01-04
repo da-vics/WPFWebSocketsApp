@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cesibet.ViewModels;
+using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,7 +11,7 @@ namespace Cesibet.Helpers
     class JoinServer
     {
         public static Action<int> realeaseBtn;
-        public static Action<string> realeaseBtnQuestions;
+        public static Action<string, bool> realeaseBtnQuestions;
 
         public static bool Pageup = false;
         public static int CurIndex = 0;
@@ -61,7 +62,7 @@ namespace Cesibet.Helpers
             else if (Data.Contains("ShowResult"))
             {
                 var spilt = Data.Split(":");
-                realeaseBtnQuestions?.Invoke($"Number of Yes: {spilt[1]}");
+                realeaseBtnQuestions?.Invoke($"Number of Yes: {spilt[1]}", false);
             }
 
             else if (Data.Contains("Next"))
@@ -69,6 +70,13 @@ namespace Cesibet.Helpers
                 Pageup = true;
                 var spilt = Data.Split(":");
                 CurIndex = Int32.Parse(spilt[1]);
+            }
+
+            else if (Data.Contains("Result"))
+            {
+                var spilt = Data.Split("~");
+                ResultsViewModel.JsonString = spilt[1];
+                realeaseBtnQuestions?.Invoke("", true);
             }
         }
 

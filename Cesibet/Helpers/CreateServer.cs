@@ -5,6 +5,8 @@ using System.Diagnostics;
 using System.Linq;
 using WebSocketSharp;
 using WebSocketSharp.Server;
+using Newtonsoft.Json;
+using Cesibet.ViewModels;
 
 namespace Cesibet.Helpers
 {
@@ -12,14 +14,12 @@ namespace Cesibet.Helpers
     {
         protected override void OnMessage(MessageEventArgs e)
         {
-            var listIDs = Sessions.IDs.ToList<string>();
-            var ID = listIDs[listIDs.Count - 1];
             var Data = e.Data;
 
             if (Data.Contains("username:"))
             {
                 var tempSplit = Data.Split(":");
-                CreateServer.UsersID.Add(tempSplit[1], new UserModel { ID = ID, Points = 0 });
+                CreateServer.UsersID.Add(ID, new UserModel { UserName = tempSplit[1], Points = 0 });
                 Send("Added:Done");
 
                 if (CreateServer.UsersID.Count - 1 == CreateServer.NoPlayers)
@@ -36,28 +36,7 @@ namespace Cesibet.Helpers
             {
                 var split = Data.Split(":");
                 CreateServer.UsersAnswer.Add(ID, new Answers { QuestionAnswer = split[1], Estimate = Int32.Parse(split[2]) });
-
-                if (CreateServer.UsersAnswer.Count - 1 == CreateServer.NoPlayers)
-                {
-                    if (CreateServer.curNoRounds < CreateServer.NoRounds)
-                    {
-                        ++CreateServer.curNoRounds;
-                        var keys = CreateServer.UsersAnswer.Keys;
-
-                        int count = 0;
-                        foreach (var key in keys)
-                        {
-                            var model = CreateServer.UsersAnswer[key];
-                            if (model.QuestionAnswer == "Yes")
-                                ++count;
-                        }
-                        Sessions.Broadcast($"ShowResult:{count}");
-                        CreateServer.realeaseBtnQuestions?.Invoke($"Number of Yes: {count}");
-                    }
-
-                    CreateServer.UsersAnswer.Clear();
-                }//
-
+                CreateServer.CheckQuestion();
             }
 
         }
@@ -73,7 +52,7 @@ namespace Cesibet.Helpers
         public static int curNoRounds = 0;
         public static bool IsGamePlay = false;
         public static Action<int> realeaseBtn;
-        public static Action<string> realeaseBtnQuestions;
+        public static Action<string, bool> realeaseBtnQuestions;
         public static Dictionary<string, UserModel> UsersID = new Dictionary<string, UserModel>();
         public static Dictionary<string, Answers> UsersAnswer = new Dictionary<string, Answers>();
         public static bool answered = false;
@@ -82,9 +61,59 @@ namespace Cesibet.Helpers
         {
         }
 
+        public static void CheckQuestion()
+        {
+            if (UsersAnswer.Count - 1 == NoPlayers)
+            {
+                if (curNoRounds < NoRounds)
+                {
+                    ++curNoRounds;
+                    var keys = UsersAnswer.Keys;
+                    int count = 0;
+                    foreach (var key in keys)
+                    {
+                        var model = UsersAnswer[key];
+                        if (model.QuestionAnswer == "Yes")
+                        {
+                            ++count;
+                        }
+                    }
+
+
+                    foreach (var key in keys)
+                    {
+                        if (UsersAnswer[key].Estimate == count)
+                        {
+                            UsersID[key].Points += 2;
+                        }
+                    }
+
+                    Sendmessage($"ShowResult:{count}");
+                    realeaseBtnQuestions?.Invoke($"Number of Yes: {count}", false);
+                    UsersAnswer.Clear();
+                }
+
+                else
+                {
+                    var userModelList = new List<UserModel>();
+                    var keys = UsersID.Keys;
+                    foreach (var key in keys)
+                    {
+                        userModelList.Add(new UserModel { UserName = UsersID[key].UserName, Points = UsersID[key].Points });
+                    }
+                    string json = JsonConvert.SerializeObject(userModelList);
+                    ResultsViewModel.JsonString = json;
+                    Sendmessage($"Result~{json}");
+                    realeaseBtnQuestions?.Invoke("", true);
+                }
+
+            }//
+        }
+
         public static void AddAnswer(string answer, int estimate)
         {
             UsersAnswer.Add("NULL", new Answers { QuestionAnswer = answer, Estimate = estimate });
+            CheckQuestion();
         }
 
         public static int questionIndex()
@@ -134,7 +163,7 @@ namespace Cesibet.Helpers
             wssv.AddWebSocketService<Echo>("/Echo");
             wssv.Start();
             Debug.WriteLine("WS server started on ws://127.0.0.1:7890/Echo");
-            UsersID.Add("HOST", new UserModel { ID = "NULL", Points = 0 });
+            UsersID.Add("NULL", new UserModel { UserName = "HOST", Points = 0 });
 
         }
 
@@ -144,4 +173,5 @@ namespace Cesibet.Helpers
         }
 
     }
+
 }

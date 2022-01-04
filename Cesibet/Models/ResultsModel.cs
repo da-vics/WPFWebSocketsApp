@@ -4,9 +4,9 @@ using System.Text;
 
 namespace Cesibet.Models
 {
-    class UserModel
+    class ResultsModel
     {
         public string UserName { get; set; }
-        public int Points { get; set; }
+        public string Points { get; set; }
     }
 }
